@@ -143,7 +143,10 @@ class MapWindow(QMainWindow):
         address = toponym['metaDataProperty']['GeocoderMetaData']['Address']
         self.aaadddress = address['formatted']
         self.information = address['formatted']
-        self.index = address['postal_code']
+        if('postal_code' in address):
+            self.index = address['postal_code']
+        else:
+            self.index = ''
         self.loadMap()
 
 
