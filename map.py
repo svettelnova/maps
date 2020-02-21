@@ -27,22 +27,26 @@ class MapWindow(QMainWindow):
         self.setWindowTitle("Карта")
         self.txt_search = QTextEdit('', self)
         self.txt_search.move(10, 10)
-        self.txt_search.resize(QSize(600, 30))
+        self.txt_search.resize(QSize(470, 30))
         self.btn = QPushButton('Искать', self)
         self.btn.resize(self.btn.sizeHint())
         self.btn.move(self.txt_search.size().width() + 20, 10)
         self.btn.clicked.connect(self.search)
-        self.btn_fault = QPushButton('Сброс', self)
-        self.btn_fault.resize(self.btn_fault.sizeHint())
-        self.btn_fault.move(self.txt_search.size().width() + self.btn.size().width() + 25, 10)
-        self.btn_fault.clicked.connect(self.clear_search)
         self.layers = ['map', 'sat', 'sat,skl']
         self.btn_layers = QComboBox(self)
         self.btn_layers.addItems(self.layers)
         self.btn_layers.resize(self.btn_layers.sizeHint())
-        self.btn_layers.move(
-            self.txt_search.size().width() + self.btn.size().width() + self.btn_fault.size().width() + 30, 10)
+        self.btn_layers.move(self.txt_search.size().width() + self.btn.size().width() + 25, 10)
         self.btn_layers.currentIndexChanged.connect(self.layer_changed)
+        self.btn_delete = QPushButton('Сброс', self)
+        self.btn_delete.resize(self.btn_delete.sizeHint())
+        self.btn_delete.move(self.txt_search.size().width() + self.btn.size().width() + 30 +
+                             self.btn_layers.size().width(), 10)
+        self.btn_delete.clicked.connect(self.discharge)
+        self.information = QTextEdit('', self)
+        self.information.resize(QSize(335, 30))
+        self.information.move(self.txt_search.size().width() + self.btn.size().width() + 35 +
+                              self.btn_layers.size().width() + self.btn_delete.size().width(), 10)
 
         self.mapView = QLabel(self)
         self.mapView.move(10, 50)
@@ -87,6 +91,7 @@ class MapWindow(QMainWindow):
         event.ignore()
         return QTextEdit.keyPressEvent(self.txt_search, event)
 
+
     def search(self):
         toponym_to_find = self.txt_search.toPlainText()
         if toponym_to_find == '':
@@ -124,13 +129,11 @@ class MapWindow(QMainWindow):
         rt_long, rt_lat = float(rt[0]), float(rt[1])
         self.delta_latitude = abs(rt_lat - lb_lat)
         self.delta_longitude = abs(rt_long - lb_long)
+        address = toponym['metaDataProperty']['GeocoderMetaData']['Address']
+        print(address['formatted'])
+        self.information = address['formatted']
         self.loadMap()
 
-    def clear_search(self):
-        self.pt_latitude = 0
-        self.pt_longitude = 0
-        self.txt_search.setPlainText('')
-        self.loadMap()
 
     def loadMap(self):
         coord = ",".join([str(self.longitude), str(self.latitude)])
@@ -163,6 +166,12 @@ class MapWindow(QMainWindow):
         pixmap = QPixmap()
         pixmap.loadFromData(ba, "PNG")
         self.mapView.setPixmap(pixmap)
+
+    def discharge(self):
+        self.pt_latitude = 0
+        self.pt_longitude = 0
+        self.txt_search.setPlainText('')
+        self.loadMap()
 
 
 if __name__ == '__main__':
