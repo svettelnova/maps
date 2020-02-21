@@ -27,16 +27,21 @@ class MapWindow(QMainWindow):
         self.setWindowTitle("Карта")
         self.txt_search = QTextEdit('', self)
         self.txt_search.move(10, 10)
-        self.txt_search.resize(QSize(800, 30))
+        self.txt_search.resize(QSize(600, 30))
         self.btn = QPushButton('Искать', self)
         self.btn.resize(self.btn.sizeHint())
         self.btn.move(self.txt_search.size().width() + 20, 10)
         self.btn.clicked.connect(self.search)
+        self.btn_fault = QPushButton('Сброс', self)
+        self.btn_fault.resize(self.btn_fault.sizeHint())
+        self.btn_fault.move(self.txt_search.size().width() + self.btn.size().width() + 25, 10)
+        self.btn_fault.clicked.connect(self.clear_search)
         self.layers = ['map', 'sat', 'sat,skl']
         self.btn_layers = QComboBox(self)
         self.btn_layers.addItems(self.layers)
         self.btn_layers.resize(self.btn_layers.sizeHint())
-        self.btn_layers.move(self.txt_search.size().width() + self.btn.size().width() + 25, 10)
+        self.btn_layers.move(
+            self.txt_search.size().width() + self.btn.size().width() + self.btn_fault.size().width() + 30, 10)
         self.btn_layers.currentIndexChanged.connect(self.layer_changed)
 
         self.mapView = QLabel(self)
@@ -47,7 +52,6 @@ class MapWindow(QMainWindow):
     def layer_changed(self, index):
         self.layer = self.layers[index]
         self.loadMap()
-
 
     def keyPressEvent(self, event):
         if event.key() == Qt.Key_PageDown and self.scale > 1:
@@ -82,7 +86,6 @@ class MapWindow(QMainWindow):
                 self.loadMap()
         event.ignore()
         return QTextEdit.keyPressEvent(self.txt_search, event)
-
 
     def search(self):
         toponym_to_find = self.txt_search.toPlainText()
@@ -123,6 +126,11 @@ class MapWindow(QMainWindow):
         self.delta_longitude = abs(rt_long - lb_long)
         self.loadMap()
 
+    def clear_search(self):
+        self.pt_latitude = 0
+        self.pt_longitude = 0
+        self.txt_search.setPlainText('')
+        self.loadMap()
 
     def loadMap(self):
         coord = ",".join([str(self.longitude), str(self.latitude)])
