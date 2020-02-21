@@ -170,7 +170,7 @@ class MapWindow(QMainWindow):
     def discharge(self):
         self.pt_latitude = 0
         self.pt_longitude = 0
-        self.txt_search = ''
+        self.txt_search.setPlainText('')
         self.loadMap()
 
 
