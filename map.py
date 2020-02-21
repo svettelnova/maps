@@ -19,6 +19,9 @@ class MapWindow(QMainWindow):
         self.delta_longitude = 2
         self.delta_latitude = 2
         self.layer = "map"
+        self.aaadddress = ''
+        self.index = ''
+        self.num = 0
         self.initUI()
         self.loadMap()
 
@@ -27,7 +30,7 @@ class MapWindow(QMainWindow):
         self.setWindowTitle("Карта")
         self.txt_search = QTextEdit('', self)
         self.txt_search.move(10, 10)
-        self.txt_search.resize(QSize(470, 30))
+        self.txt_search.resize(QSize(250, 30))
         self.btn = QPushButton('Искать', self)
         self.btn.resize(self.btn.sizeHint())
         self.btn.move(self.txt_search.size().width() + 20, 10)
@@ -44,9 +47,15 @@ class MapWindow(QMainWindow):
                              self.btn_layers.size().width(), 10)
         self.btn_delete.clicked.connect(self.discharge)
         self.information = QTextEdit('', self)
-        self.information.resize(QSize(335, 30))
+        self.information.resize(QSize(289, 30))
         self.information.move(self.txt_search.size().width() + self.btn.size().width() + 35 +
                               self.btn_layers.size().width() + self.btn_delete.size().width(), 10)
+        self.btn_index = QPushButton('Почт.индекс', self)
+        self.btn_index.resize(self.btn_index.sizeHint())
+        self.btn_index.move(self.txt_search.size().width() + self.btn.size().width() + 40 +
+                            self.btn_layers.size().width() + self.btn_delete.size().width() +
+                            self.information.size().width(), 10)
+        self.btn_index.clicked.connect(self.index_on_off)
 
         self.mapView = QLabel(self)
         self.mapView.move(10, 50)
@@ -130,8 +139,9 @@ class MapWindow(QMainWindow):
         self.delta_latitude = abs(rt_lat - lb_lat)
         self.delta_longitude = abs(rt_long - lb_long)
         address = toponym['metaDataProperty']['GeocoderMetaData']['Address']
-        print(address['formatted'])
+        self.aaadddress = address['formatted']
         self.information = address['formatted']
+        self.index = address['postal_code']
         self.loadMap()
 
 
@@ -171,6 +181,15 @@ class MapWindow(QMainWindow):
         self.pt_latitude = 0
         self.pt_longitude = 0
         self.txt_search.setPlainText('')
+        self.loadMap()
+
+    def index_on_off(self):
+        self.num += 1
+        if self.num % 2 != 0:
+            self.aaadddress += self.index
+        else:
+            self.aaadddress -= self.index
+        self.information = self.aaadddress
         self.loadMap()
 
 
