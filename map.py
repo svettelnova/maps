@@ -20,8 +20,8 @@ class MapWindow(QMainWindow):
         self.delta_latitude = 2
         self.layer = "map"
         self.aaadddress = ''
-        self.index = ''
-        self.num = 0
+        self.indexs = ''
+        self.pochta = "Почт.индекс"
         self.initUI()
         self.loadMap()
 
@@ -50,12 +50,14 @@ class MapWindow(QMainWindow):
         self.information.resize(QSize(289, 30))
         self.information.move(self.txt_search.size().width() + self.btn.size().width() + 35 +
                               self.btn_layers.size().width() + self.btn_delete.size().width(), 10)
-        self.btn_index = QPushButton('Почт.индекс', self)
+        self.btn_index = QComboBox(self)
+        self.on_off = ['Вкл', 'Выкл']
+        self.btn_index.addItems(self.on_off)
         self.btn_index.resize(self.btn_index.sizeHint())
         self.btn_index.move(self.txt_search.size().width() + self.btn.size().width() + 40 +
                             self.btn_layers.size().width() + self.btn_delete.size().width() +
                             self.information.size().width(), 10)
-        self.btn_index.clicked.connect(self.index_on_off)
+        self.btn_layers.currentIndexChanged.connect(self.index_on_off)
 
         self.mapView = QLabel(self)
         self.mapView.move(10, 50)
@@ -184,11 +186,11 @@ class MapWindow(QMainWindow):
         self.loadMap()
 
     def index_on_off(self):
-        self.num += 1
-        if self.num % 2 != 0:
-            self.aaadddress += self.index
-        else:
-            self.aaadddress -= self.index
+        self.self.pochta = self.on_off[index]
+        if index == 0:
+            self.aaadddress += self.indexs
+        elif index == 1:
+            self.aaadddress -= self.indexs
         self.information = self.aaadddress
         self.loadMap()
 
