@@ -1,8 +1,8 @@
 import sys
 import requests
-from PyQt5.QtWidgets import QApplication, QWidget, QPushButton, QLabel, QMainWindow
+from PyQt5.QtWidgets import QApplication, QPushButton, QLabel, QMainWindow
 from PyQt5.QtWidgets import QTextEdit, QErrorMessage, QComboBox
-from PyQt5.QtCore import QSize, QBuffer, QByteArray, QEvent, Qt
+from PyQt5.QtCore import QSize, QBuffer, QByteArray, Qt
 from PyQt5.QtGui import QPixmap
 from io import BytesIO
 from PIL import Image
@@ -102,7 +102,6 @@ class MapWindow(QMainWindow):
         event.ignore()
         return QTextEdit.keyPressEvent(self.txt_search, event)
 
-
     def search(self):
         toponym_to_find = self.txt_search.toPlainText()
         if toponym_to_find == '':
@@ -143,12 +142,11 @@ class MapWindow(QMainWindow):
         address = toponym['metaDataProperty']['GeocoderMetaData']['Address']
         self.aaadddress = address['formatted']
         self.information = address['formatted']
-        if('postal_code' in address):
+        if ('postal_code' in address):
             self.index = address['postal_code']
         else:
             self.index = ''
         self.loadMap()
-
 
     def loadMap(self):
         coord = ",".join([str(self.longitude), str(self.latitude)])
@@ -189,10 +187,10 @@ class MapWindow(QMainWindow):
         self.loadMap()
 
     def index_on_off(self):
-        self.self.pochta = self.on_off[index]
-        if index == 0:
+        self.self.pochta = self.on_off[self.index]
+        if self.index == 0:
             self.aaadddress += self.indexs
-        elif index == 1:
+        elif self.index == 1:
             self.aaadddress -= self.indexs
         self.information = self.aaadddress
         self.loadMap()
