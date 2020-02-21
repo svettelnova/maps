@@ -30,38 +30,34 @@ class MapWindow(QMainWindow):
         self.setWindowTitle("Карта")
         self.txt_search = QTextEdit('', self)
         self.txt_search.move(10, 10)
-        self.txt_search.resize(QSize(250, 30))
+        self.txt_search.resize(QSize(500, 30))
         self.btn = QPushButton('Искать', self)
         self.btn.resize(self.btn.sizeHint())
-        self.btn.move(self.txt_search.size().width() + 20, 10)
+        self.btn.move(self.txt_search.size().width() + 100, 10)
         self.btn.clicked.connect(self.search)
         self.layers = ['map', 'sat', 'sat,skl']
         self.btn_layers = QComboBox(self)
         self.btn_layers.addItems(self.layers)
         self.btn_layers.resize(self.btn_layers.sizeHint())
-        self.btn_layers.move(self.txt_search.size().width() + self.btn.size().width() + 25, 10)
+        self.btn_layers.move(self.txt_search.size().width() + self.btn.size().width() + 200, 10)
         self.btn_layers.currentIndexChanged.connect(self.layer_changed)
         self.btn_delete = QPushButton('Сброс', self)
         self.btn_delete.resize(self.btn_delete.sizeHint())
-        self.btn_delete.move(self.txt_search.size().width() + self.btn.size().width() + 30 +
-                             self.btn_layers.size().width(), 10)
+        self.btn_delete.move(10, 50)
         self.btn_delete.clicked.connect(self.discharge)
         self.information = QTextEdit('', self)
         self.information.resize(QSize(289, 30))
-        self.information.move(self.txt_search.size().width() + self.btn.size().width() + 35 +
-                              self.btn_layers.size().width() + self.btn_delete.size().width(), 10)
+        self.information.move(self.btn_delete.size().width() + 100, 50)
         self.btn_index = QComboBox(self)
         self.on_off = ['Вкл', 'Выкл']
         self.btn_index.addItems(self.on_off)
         self.btn_index.resize(self.btn_index.sizeHint())
-        self.btn_index.move(self.txt_search.size().width() + self.btn.size().width() + 40 +
-                            self.btn_layers.size().width() + self.btn_delete.size().width() +
-                            self.information.size().width(), 10)
+        self.btn_index.move(self.btn_delete.size().width() + self.information.size().width() + 200, 50)
         self.btn_layers.currentIndexChanged.connect(self.index_on_off)
 
         self.mapView = QLabel(self)
-        self.mapView.move(10, 50)
-        self.mapView.resize(1040, 720)
+        self.mapView.move(10, 90)
+        self.mapView.resize(1040, 660)
         self.txt_search.keyPressEvent = self.keyPressEvent
 
     def layer_changed(self, index):
@@ -141,7 +137,7 @@ class MapWindow(QMainWindow):
         self.delta_longitude = abs(rt_long - lb_long)
         address = toponym['metaDataProperty']['GeocoderMetaData']['Address']
         self.aaadddress = address['formatted']
-        self.information = address['formatted']
+        self.information += self.aaadddress
         if ('postal_code' in address):
             self.index = address['postal_code']
         else:
@@ -190,9 +186,10 @@ class MapWindow(QMainWindow):
         self.self.pochta = self.on_off[self.index]
         if self.index == 0:
             self.aaadddress += self.indexs
+            self.information += self.aaadddress
         elif self.index == 1:
             self.aaadddress -= self.indexs
-        self.information = self.aaadddress
+            self.information = self.aaadddress
         self.loadMap()
 
 
