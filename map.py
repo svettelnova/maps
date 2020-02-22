@@ -3,7 +3,7 @@ import requests
 from PyQt5.QtWidgets import QApplication, QPushButton, QLabel, QMainWindow, QCheckBox
 from PyQt5.QtWidgets import QTextEdit, QErrorMessage, QComboBox
 from PyQt5.QtCore import QSize, QBuffer, QByteArray, Qt
-from PyQt5.QtGui import QPixmap
+from PyQt5.QtGui import QPixmap, QPalette, QColor
 from io import BytesIO
 from PIL import Image
 
@@ -25,7 +25,7 @@ class MapWindow(QMainWindow):
         self.loadMap()
 
     def initUI(self):
-        self.setGeometry(100, 100, 1060, 780)
+        self.setGeometry(100, 100, 1060, 760)
         self.setWindowTitle("Карта")
         self.txt_search = QTextEdit('', self)
         self.txt_search.move(10, 10)
@@ -55,6 +55,9 @@ class MapWindow(QMainWindow):
         self.mapView.move(10, 90)
         self.mapView.resize(1040, 660)
         self.txt_search.keyPressEvent = self.keyPressEvent
+        self.lb_errortext = QLabel("test", self)
+        self.lb_errortext.move(10, self.mapView.geometry().top() + 5)
+        self.lb_errortext.setStyleSheet("font: 18pt Comic Sans MS;color:red")
 
     def layer_changed(self, index):
         self.layer = self.layers[index]
@@ -94,11 +97,14 @@ class MapWindow(QMainWindow):
         event.ignore()
         return QTextEdit.keyPressEvent(self.txt_search, event)
 
+    def show_error(self, error):
+        self.lb_errortext.setText(error)
+        self.lb_errortext.resize(self.lb_errortext.sizeHint())
+
     def search(self):
         toponym_to_find = self.txt_search.toPlainText()
         if toponym_to_find == '':
-            error_dialog = QErrorMessage()
-            error_dialog.showMessage('Введите адрес')
+            self.show_error('Введите адрес.')
             return
         geocoder_api_server = "http://geocode-maps.yandex.ru/1.x/"
 
@@ -110,10 +116,9 @@ class MapWindow(QMainWindow):
         response = requests.get(geocoder_api_server, params=geocoder_params)
 
         if not response:
-            # обработка ошибочной ситуации
-            error_dialog = QErrorMessage()
-            error_dialog.showMessage('Ошибка выполнения вопроса: ' + response.reason)
+            self.show_error('Ошибка выполнения запроса: ' + response.reason)
             return
+        self.show_error('')
 
         # Преобразуем ответ в json-объект
         json_response = response.json()
@@ -157,9 +162,9 @@ class MapWindow(QMainWindow):
         response = requests.get(map_api_server, params=map_params)
         if not response:
             # обработка ошибочной ситуации
-            error_dialog = QErrorMessage()
-            error_dialog.showMessage('Ошибка выполнения вопроса: ' + response.reason)
+            self.show_error('Ошибка выполнения запроса: ' + response.reason)
             return
+        self.show_error('')
         bytes = BytesIO(response.content)
         img = Image.open(bytes)
         img = img.resize((1040, 720))
