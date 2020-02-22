@@ -1,6 +1,6 @@
 import sys
 import requests
-from PyQt5.QtWidgets import QApplication, QPushButton, QLabel, QMainWindow
+from PyQt5.QtWidgets import QApplication, QPushButton, QLabel, QMainWindow, QCheckBox
 from PyQt5.QtWidgets import QTextEdit, QErrorMessage, QComboBox
 from PyQt5.QtCore import QSize, QBuffer, QByteArray, Qt
 from PyQt5.QtGui import QPixmap
@@ -19,9 +19,8 @@ class MapWindow(QMainWindow):
         self.delta_longitude = 2
         self.delta_latitude = 2
         self.layer = "map"
-        self.aaadddress = ''
-        self.indexs = ''
-        self.pochta = "Почт.индекс"
+        self.address = ''
+        self.post_code = ""
         self.initUI()
         self.loadMap()
 
@@ -30,30 +29,27 @@ class MapWindow(QMainWindow):
         self.setWindowTitle("Карта")
         self.txt_search = QTextEdit('', self)
         self.txt_search.move(10, 10)
-        self.txt_search.resize(QSize(500, 30))
+        self.txt_search.resize(QSize(600, 30))
         self.btn = QPushButton('Искать', self)
         self.btn.resize(self.btn.sizeHint())
-        self.btn.move(self.txt_search.size().width() + 100, 10)
+        self.btn.move(self.txt_search.geometry().right() + 10, 10)
         self.btn.clicked.connect(self.search)
+        self.btn_delete = QPushButton('Сброс', self)
+        self.btn_delete.resize(self.btn_delete.sizeHint())
+        self.btn_delete.move(self.btn.geometry().right() + 10, 10)
+        self.btn_delete.clicked.connect(self.discharge)
         self.layers = ['map', 'sat', 'sat,skl']
         self.btn_layers = QComboBox(self)
         self.btn_layers.addItems(self.layers)
         self.btn_layers.resize(self.btn_layers.sizeHint())
-        self.btn_layers.move(self.txt_search.size().width() + self.btn.size().width() + 200, 10)
+        self.btn_layers.move(self.btn_delete.geometry().right() + 100, 10)
         self.btn_layers.currentIndexChanged.connect(self.layer_changed)
-        self.btn_delete = QPushButton('Сброс', self)
-        self.btn_delete.resize(self.btn_delete.sizeHint())
-        self.btn_delete.move(10, 50)
-        self.btn_delete.clicked.connect(self.discharge)
-        self.information = QTextEdit('', self)
-        self.information.resize(QSize(289, 30))
-        self.information.move(self.btn_delete.size().width() + 100, 50)
-        self.btn_index = QComboBox(self)
-        self.on_off = ['Вкл', 'Выкл']
-        self.btn_index.addItems(self.on_off)
-        self.btn_index.resize(self.btn_index.sizeHint())
-        self.btn_index.move(self.btn_delete.size().width() + self.information.size().width() + 200, 50)
-        self.btn_layers.currentIndexChanged.connect(self.index_on_off)
+        self.cb_include_post_code = QCheckBox('Включить почтовый индекс в адрес', self)
+        self.cb_include_post_code.resize(self.cb_include_post_code.sizeHint())
+        self.cb_include_post_code.move(10, 50)
+        self.cb_include_post_code.clicked.connect(self.post_code_changed)
+        self.lb_full_address = QLabel(self)
+        self.lb_full_address.move(self.cb_include_post_code.geometry().right() + 10, 50)
 
         self.mapView = QLabel(self)
         self.mapView.move(10, 90)
@@ -136,12 +132,12 @@ class MapWindow(QMainWindow):
         self.delta_latitude = abs(rt_lat - lb_lat)
         self.delta_longitude = abs(rt_long - lb_long)
         address = toponym['metaDataProperty']['GeocoderMetaData']['Address']
-        self.aaadddress = address['formatted']
-        self.information += self.aaadddress
+        self.address = address['formatted']
         if ('postal_code' in address):
-            self.index = address['postal_code']
+            self.post_code = address['postal_code']
         else:
-            self.index = ''
+            self.post_code = ''
+        self.post_code_changed()
         self.loadMap()
 
     def loadMap(self):
@@ -180,17 +176,20 @@ class MapWindow(QMainWindow):
         self.pt_latitude = 0
         self.pt_longitude = 0
         self.txt_search.setPlainText('')
+        self.address = ''
+        self.post_code = ''
+        self.post_code_changed()
         self.loadMap()
 
-    def index_on_off(self):
-        self.self.pochta = self.on_off[self.index]
-        if self.index == 0:
-            self.aaadddress += self.indexs
-            self.information += self.aaadddress
-        elif self.index == 1:
-            self.aaadddress -= self.indexs
-            self.information = self.aaadddress
-        self.loadMap()
+    def post_code_changed(self):
+        if self.address == '':
+            self.lb_full_address.setText('')
+            return
+        text = 'Адрес объекта: ' + self.address
+        if self.cb_include_post_code.isChecked() and self.post_code != '':
+            text += ', почтовый индекс: ' + self.post_code
+        self.lb_full_address.setText(text)
+        self.lb_full_address.resize(self.lb_full_address.sizeHint())
 
 
 if __name__ == '__main__':
